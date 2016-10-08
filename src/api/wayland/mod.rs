@@ -7,6 +7,8 @@ use api::dlopen;
 use api::egl;
 use api::egl::Context as EglContext;
 use wayland_client::egl as wegl;
+use wayland_client::wayland::compositor::WlSurface;
+use wayland_client::Proxy;
 use winit::api::wayland::{ShellWindow, substract_borders};
 
 pub struct Window {
@@ -24,12 +26,21 @@ impl Window {
             winit::platform::Window::X(_) => unimplemented!(),
             winit::platform::Window::Wayland(ref w) => w,
         };
+        /*
         let (surface, _) = match winit_wayland.wayland_context.new_surface() {
             Some(t) => t,
             None => return Err(CreationError::NotSupported)
         };
+        */
+        let surface = {
+            let ptr = winit_wayland.surface.ptr();
+            unsafe {
+                WlSurface::from_ptr(ptr)
+                // WlSurface::from_ptr_no_own(ptr) // TODO: и еще вот так попробуй
+            }
+        };
         let (w, h) = winit_wayland.get_inner_size().unwrap();
-        let egl_surface = wegl::WlEglSurface::new(surface, w, h);
+        let egl_surface = wegl::WlEglSurface::new(surface, w as i32, h as i32);
         let context = {
             let libegl = unsafe { dlopen::dlopen(b"libEGL.so\0".as_ptr() as *const _, dlopen::RTLD_NOW) };
             if libegl.is_null() {
