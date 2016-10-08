@@ -1,5 +1,6 @@
 use winit;
 
+use Event;
 use ContextError;
 use CreationError;
 use GlAttributes;
@@ -22,6 +23,44 @@ pub enum Window {
 }
 
 pub use winit::platform::{MonitorId, get_available_monitors, get_primary_monitor};
+
+pub enum PollEventsIterator<'a> {
+    // #[doc(hidden)]
+    // X(x11::PollEventsIterator<'a>),
+    #[doc(hidden)]
+    Wayland(wayland::PollEventsIterator<'a>)
+}
+
+impl<'a> Iterator for PollEventsIterator<'a> {
+    type Item = Event;
+
+    #[inline]
+    fn next(&mut self) -> Option<Event> {
+        match self {
+            // &mut PollEventsIterator::X(ref mut it) => it.next(),
+            &mut PollEventsIterator::Wayland(ref mut it) => it.next()
+        }
+    }
+}
+
+pub enum WaitEventsIterator<'a> {
+    #[doc(hidden)]
+    // X(x11::WaitEventsIterator<'a>),
+    #[doc(hidden)]
+    Wayland(wayland::WaitEventsIterator<'a>)
+}
+
+impl<'a> Iterator for WaitEventsIterator<'a> {
+    type Item = Event;
+
+    #[inline]
+    fn next(&mut self) -> Option<Event> {
+        match self {
+            // &mut WaitEventsIterator::X(ref mut it) => it.next(),
+            &mut WaitEventsIterator::Wayland(ref mut it) => it.next()
+        }
+    }
+}
 
 impl Window {
     #[inline]
@@ -57,6 +96,34 @@ impl Window {
             },
         }
     }
+
+    #[inline]
+    pub fn poll_events<'a>(&'a self, ozkriff_window: &'a winit::Window) -> PollEventsIterator {
+        match self {
+            // &Window::X(ref w) => PollEventsIterator::X(w.poll_events()),
+            &Window::Wayland(ref w) => PollEventsIterator::Wayland(w.poll_events(ozkriff_window)),
+            _ => panic!("123"),
+        }
+    }
+
+    #[inline]
+    pub fn wait_events<'a>(&'a self, ozkriff_window: &'a winit::Window) -> WaitEventsIterator {
+        match self {
+            // &Window::X(ref w) => WaitEventsIterator::X(w.wait_events()),
+            &Window::Wayland(ref w) => WaitEventsIterator::Wayland(w.wait_events(ozkriff_window)),
+            _ => panic!("123"),
+        }
+    }
+
+    #[inline]
+    pub fn set_inner_size<'a>(&'a self, x: u32, y: u32, ozkriff_window: &'a winit::Window) {
+        match self {
+            // &Window::X(ref w) => w.set_inner_size(x, y),
+            &Window::Wayland(ref w) => w.set_inner_size(x, y, ozkriff_window),
+            _ => panic!("123"),
+        }
+    }
+
 }
 
 impl GlContext for Window {

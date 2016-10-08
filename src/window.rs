@@ -10,10 +10,11 @@ use PixelFormat;
 use Robustness;
 use Window;
 use WindowBuilder;
+use Event;
 
 pub use winit::WindowProxy;
-pub use winit::PollEventsIterator;
-pub use winit::WaitEventsIterator;
+// pub use winit::PollEventsIterator;
+// pub use winit::WaitEventsIterator;
 pub use winit::{AvailableMonitorsIter};
 pub use winit::{get_primary_monitor, get_available_monitors};
 pub use winit::{MonitorId};
@@ -22,6 +23,39 @@ use libc;
 use platform;
 
 use winit;
+
+pub struct PollEventsIterator<'a>(platform::PollEventsIterator<'a>);
+
+impl<'a> Iterator for PollEventsIterator<'a> {
+    type Item = Event;
+
+    #[inline]
+    fn next(&mut self) -> Option<Event> {
+        self.0.next()
+    }
+
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.0.size_hint()
+    }
+}
+
+/// An iterator for the `wait_events` function.
+pub struct WaitEventsIterator<'a>(platform::WaitEventsIterator<'a>);
+
+impl<'a> Iterator for WaitEventsIterator<'a> {
+    type Item = Event;
+
+    #[inline]
+    fn next(&mut self) -> Option<Event> {
+        self.0.next()
+    }
+
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.0.size_hint()
+    }
+}
 
 impl<'a> WindowBuilder<'a> {
     /// Initializes a new `WindowBuilder` with default values.
@@ -397,7 +431,7 @@ impl Window {
     /// This is a no-op if the window has already been closed.
     #[inline]
     pub fn set_inner_size(&self, x: u32, y: u32) {
-        self.ozkriff_window.set_inner_size(x, y)
+        self.window.set_inner_size(x, y, &self.ozkriff_window)
     }
 
     /// Returns an iterator that poll for the next event in the window's events queue.
@@ -405,8 +439,8 @@ impl Window {
     ///
     /// Contrary to `wait_events`, this function never blocks.
     #[inline]
-    pub fn poll_events(&self) -> winit::PollEventsIterator {
-        self.ozkriff_window.poll_events()
+    pub fn poll_events(&self) -> PollEventsIterator {
+        PollEventsIterator(self.window.poll_events(&self.ozkriff_window))
     }
 
     /// Returns an iterator that returns events one by one, blocking if necessary until one is
@@ -414,8 +448,8 @@ impl Window {
     ///
     /// The iterator never returns `None`.
     #[inline]
-    pub fn wait_events(&self) -> winit::WaitEventsIterator {
-        self.ozkriff_window.wait_events()
+    pub fn wait_events(&self) -> WaitEventsIterator {
+        WaitEventsIterator(self.window.wait_events(&self.ozkriff_window))
     }
 
     /// Sets the context as the current context.

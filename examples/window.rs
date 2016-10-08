@@ -22,7 +22,7 @@ fn main() {
     println!("Pixel format of the window: {:?}", window.get_pixel_format());
 
     let context = support::load(&window);
-
+    window.set_inner_size(1024, 768);
     for event in window.wait_events() {
         context.draw_frame((0.0, 1.0, 0.0, 1.0));
         let _ = window.swap_buffers();

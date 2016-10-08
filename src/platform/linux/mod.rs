@@ -12,6 +12,7 @@ use api::osmesa::{self, OsMesaContext};
 
 pub use self::api_dispatch::{Window, MonitorId, get_available_monitors, get_primary_monitor};
 pub use self::api_dispatch::PlatformSpecificWindowBuilderAttributes;
+pub use self::api_dispatch::{PollEventsIterator, WaitEventsIterator};
 mod api_dispatch;
 
 // pub use winit::{MonitorId, get_available_monitors, get_primary_monitor};
