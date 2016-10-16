@@ -244,7 +244,7 @@ impl<'a> WindowBuilder<'a> {
             &self.platform_specific,
             &winit_window,
         ));
-        // let ozkriff_w = try!(winit::Window::new(&self.window, &self.platform_specific));
+        // let ozkriff_w = try!(winit::Window::new(&self.window, &self.platform_specific)); // TODO: OZKRIFF
 
         Result::Ok(Window {
             window: w,

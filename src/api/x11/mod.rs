@@ -5,8 +5,6 @@ pub use winit::api::x11::{XError, XNotSupported, XConnection};
 pub mod ffi;
 
 use CreationError;
-use libc;
-use std::borrow::Borrow;
 use std::{mem, ptr};
 use std::sync::{Arc};
 

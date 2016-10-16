@@ -19,8 +19,6 @@ use std::{mem, ptr};
 
 use api::x11::ffi;
 
-use platform::Window as PlatformWindow;
-
 pub struct Context {
     glx: ffi::glx::Glx,
     display: *mut ffi::Display,
