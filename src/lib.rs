@@ -69,8 +69,6 @@ pub use window::{AvailableMonitorsIter, MonitorId, get_available_monitors, get_p
 pub use winit::NativeMonitorId;
 
 use std::io;
-#[cfg(not(target_os = "macos"))]
-use std::cmp::Ordering;
 
 mod api;
 mod platform;
@@ -104,9 +102,6 @@ pub mod os;
 /// }
 /// ```
 pub struct Window {
-    // TODO черт, мне кажется что не тут надо было второе окно создавать
-    // надо взять этот winit::Window и засунуть его внутрь platform::Window
-    // Только как? В том же линуксе platform::Window это перечисление. Блин, убейте меня, ничего ен понимаю.
     window: platform::Window,
     winit_window: winit::Window,
 }
@@ -114,19 +109,13 @@ pub struct Window {
 /// Object that allows you to build windows.
 // #[derive(Clone)]
 pub struct WindowBuilder<'a> {
-    pub winit_window: Option<winit::Window>,
-
-    /// The attributes to use to create the window.
-    pub window: WindowAttributes,
+    winit_builder: winit::WindowBuilder,
 
     /// The attributes to use to create the context.
     pub opengl: GlAttributes<&'a platform::Window>,
 
     // Should be made public once it's stabilized.
     pf_reqs: PixelFormatRequirements,
-
-    /// Platform-specific configuration.
-    platform_specific: platform::PlatformSpecificWindowBuilderAttributes,
 }
 
 /// Trait that describes objects that have access to an OpenGL context.

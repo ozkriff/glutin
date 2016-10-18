@@ -28,26 +28,18 @@ impl<'a> WindowBuilder<'a> {
     #[inline]
     pub fn new() -> WindowBuilder<'a> {
         WindowBuilder {
-            winit_window: None,
             pf_reqs: Default::default(),
-            window: Default::default(),
+            winit_builder: winit::WindowBuilder::new(),
             opengl: Default::default(),
-            platform_specific: Default::default(),
         }
     }
 
-    #[inline]
-    pub fn with_winit_window(mut self, winit_window: winit::Window) -> WindowBuilder<'a> {
-        self.winit_window = Some(winit_window);
-        self
-    }
- 
     /// Requests the window to be of specific dimensions.
     ///
     /// Width and height are in pixels.
     #[inline]
     pub fn with_dimensions(mut self, width: u32, height: u32) -> WindowBuilder<'a> {
-        self.window.dimensions = Some((width, height));
+        self.winit_builder = self.winit_builder.with_dimensions(width, height);
         self
     }
     
@@ -56,7 +48,7 @@ impl<'a> WindowBuilder<'a> {
     /// Width and height are in pixels.
     #[inline]
     pub fn with_min_dimensions(mut self, width: u32, height: u32) -> WindowBuilder<'a> {
-        self.window.min_dimensions = Some((width, height));
+        self.winit_builder = self.winit_builder.with_min_dimensions(width, height);
         self
     }
 
@@ -65,28 +57,25 @@ impl<'a> WindowBuilder<'a> {
     /// Width and height are in pixels.
     #[inline]
     pub fn with_max_dimensions(mut self, width: u32, height: u32) -> WindowBuilder<'a> {
-        self.window.max_dimensions = Some((width, height));
+        self.winit_builder = self.winit_builder.with_max_dimensions(width, height);
         self
     }
 
     /// Requests a specific title for the window.
     #[inline]
     pub fn with_title<T: Into<String>>(mut self, title: T) -> WindowBuilder<'a> {
-        self.window.title = title.into();
+        self.winit_builder = self.winit_builder.with_title(title);
         self
     }
 
-    /*
     /// Requests fullscreen mode.
     ///
     /// If you don't specify dimensions for the window, it will match the monitor's.
     #[inline]
     pub fn with_fullscreen(mut self, monitor: MonitorId) -> WindowBuilder<'a> {
-        let MonitorId(monitor) = monitor;
-        self.window.monitor = Some(monitor);
+        self.winit_builder = self.winit_builder.with_fullscreen(monitor);
         self
     }
-    */
 
     /// The created window will share all its OpenGL objects with the window in the parameter.
     ///
@@ -138,7 +127,7 @@ impl<'a> WindowBuilder<'a> {
     /// Sets whether the window will be initially hidden or visible.
     #[inline]
     pub fn with_visibility(mut self, visible: bool) -> WindowBuilder<'a> {
-        self.window.visible = visible;
+        self.winit_builder = self.winit_builder.with_visibility(visible);
         self
     }
 
@@ -193,21 +182,21 @@ impl<'a> WindowBuilder<'a> {
     /// Sets whether the background of the window should be transparent.
     #[inline]
     pub fn with_transparency(mut self, transparent: bool) -> WindowBuilder<'a> {
-        self.window.transparent = transparent;
+        self.winit_builder = self.winit_builder.with_transparency(transparent);
         self
     }
 
     /// Sets whether the window should have a border, a title bar, etc.
     #[inline]
     pub fn with_decorations(mut self, decorations: bool) -> WindowBuilder<'a> {
-        self.window.decorations = decorations;
+        self.winit_builder = self.winit_builder.with_decorations(decorations);
         self
     }
 
     /// Enables multitouch
     #[inline]
     pub fn with_multitouch(mut self) -> WindowBuilder<'a> {
-        self.window.multitouch = true;
+        self.winit_builder = self.winit_builder.with_multitouch();
         self
     }
 
@@ -215,36 +204,16 @@ impl<'a> WindowBuilder<'a> {
     ///
     /// Error should be very rare and only occur in case of permission denied, incompatible system,
     /// out of memory, etc.
-    pub fn build(mut self) -> Result<Window, CreationError> {
-        // resizing the window to the dimensions of the monitor when fullscreen
-        if self.window.dimensions.is_none() && self.window.monitor.is_some() {
-            self.window.dimensions = Some(self.window.monitor.as_ref().unwrap().get_dimensions())
-        }
+    pub fn build(self) -> Result<Window, CreationError> {
+        let winit_window = self.winit_builder.build().unwrap();
 
-        // default dimensions
-        if self.window.dimensions.is_none() {
-            self.window.dimensions = Some((1024, 768));
-        }
-
-        let winit_window = match self.winit_window {
-            None => {
-                match winit::Window::new() {
-                    Ok(w) => w,
-                    Err(_) => panic!(),
-                }
-            },
-            Some(w) => w,
-        };
-
-        // building
         let w = try!(platform::Window::new(
-            &self.window,
+            &Default::default(), // TODO: OZKRIFF: грохнуть все это
             &self.pf_reqs,
             &self.opengl,
-            &self.platform_specific,
+            &Default::default(), // TODO: OZKRIFF: грохнуть все это
             &winit_window,
         ));
-        // let ozkriff_w = try!(winit::Window::new(&self.window, &self.platform_specific)); // TODO: OZKRIFF
 
         Result::Ok(Window {
             window: w,
@@ -526,27 +495,6 @@ impl Window {
         self.winit_window.set_cursor_state(state)
     }
 }
-
-/*
-unsafe fn make_current(winit_window: &winit::Window) -> Result<(), ContextError> {
-    // self.make_current()
-    let w: &winit::platform::Window = &winit_window.window;
-
-    /*
-    match *w {
-        winit::platform::Window::X(ref w) => w.make_current(),
-        _ => unimplemented!(),
-    }
-    */
-
-    /*
-    match self {
-        &Window::X(ref w) => w.make_current(),
-        &Window::Wayland(ref w) => w.make_current()
-    }
-    */
-}
-*/
 
 impl GlContext for Window {
     #[inline]
