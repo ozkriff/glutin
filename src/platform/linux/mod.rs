@@ -10,7 +10,7 @@ use PixelFormatRequirements;
 
 use api::osmesa::{self, OsMesaContext};
 
-pub use self::api_dispatch::{Window, MonitorId, get_available_monitors, get_primary_monitor};
+pub use self::api_dispatch::{Window};
 pub use self::api_dispatch::PlatformSpecificWindowBuilderAttributes;
 mod api_dispatch;
 

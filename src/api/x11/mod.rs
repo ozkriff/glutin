@@ -1,6 +1,6 @@
 #![cfg(any(target_os = "linux", target_os = "dragonfly", target_os = "freebsd", target_os = "openbsd"))]
 
-pub use winit::api::x11::{XError, XNotSupported, XConnection};
+pub use winit::os::unix::x11::{XError, XNotSupported, XConnection};
 
 pub mod ffi;
 

@@ -23,8 +23,6 @@ pub enum Window {
     Wayland(wayland::Window)
 }
 
-pub use winit::platform::{MonitorId, get_available_monitors, get_primary_monitor};
-
 impl Window {
     #[inline]
     pub fn new(
