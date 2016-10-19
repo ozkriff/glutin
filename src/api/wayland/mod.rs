@@ -20,12 +20,8 @@ impl Window {
         opengl: &GlAttributes<&Window>,
         winit_window: &winit::Window,
     ) -> Result<Window, CreationError> {
-        let wayland_context = winit_window.get_wayland_context().unwrap();
-        let (surface, _) = match wayland_context.new_surface() {
-            Some(t) => t,
-            None => return Err(CreationError::NotSupported)
-        };
         let (w, h) = winit_window.get_inner_size().unwrap();
+        let surface = winit_window.get_wayland_client_surface().unwrap();
         let egl_surface = wegl::WlEglSurface::new(surface, w as i32, h as i32);
         let context = {
             let libegl = unsafe { dlopen::dlopen(b"libEGL.so\0".as_ptr() as *const _, dlopen::RTLD_NOW) };
@@ -40,7 +36,7 @@ impl Window {
                 egl,
                 pf_reqs, &opengl.clone().map_sharing(|_| unimplemented!()),        // TODO: 
                 egl::NativeDisplay::Wayland(Some(winit_window.get_wayland_display().unwrap())))
-                .and_then(|p| p.finish(unsafe { egl_surface.egl_surfaceptr() } as *const _))
+                .and_then(|p| p.finish(egl_surface.ptr() as *const _))
             )
         };
         Ok(Window {
