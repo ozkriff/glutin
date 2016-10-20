@@ -26,10 +26,10 @@ pub enum Window {
 impl Window {
     #[inline]
     pub fn new(
-        _: &WindowAttributes, // вот это надо бы убрать
+        _: &WindowAttributes,
         pf_reqs: &PixelFormatRequirements,
         opengl: &GlAttributes<&Window>,
-        _: &PlatformSpecificWindowBuilderAttributes, // и это, наверное, тоже убрать
+        _: &PlatformSpecificWindowBuilderAttributes,
         winit_window: &winit::Window,
     ) -> Result<Window, CreationError> {
         let is_x11 = winit_window.get_xlib_display().is_some();

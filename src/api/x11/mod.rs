@@ -87,7 +87,7 @@ enum Context {
 }
 
 pub struct Window {
-    display: Arc<XConnection>, // нужен, что бы кое-какие функции для той же карты цветов вызвать
+    display: Arc<XConnection>,
     colormap: ffi::Colormap,
     context: Context,
 }
