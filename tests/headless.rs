@@ -9,7 +9,7 @@ mod gl {
 use gl::types::*;
 
 
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", target_os = "windows"))]
 #[test]
 fn test_headless() {
     let width: i32 = 256;
